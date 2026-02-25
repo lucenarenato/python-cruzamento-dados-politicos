@@ -167,3 +167,28 @@ virtualenv --no-site-packages env
 $ source env/bin/activate
 $ # Install requirements
 $ pip3 install -r requirements.txt
+
+- "Website: https://basedosdados.org/",
+- https://portaldatransparencia.gov.br/api-de-dados
+
+```py
+# Internal function to abstact away HTTP requests.
+
+bd_request <- function(
+  endpoint = ? typed::Character(length = 1),
+  query = list() ? typed::List()) {
+
+  base_url <- "https://basedosdados.org/api/3/action/bd_"
+  target_endpoint <- paste0(base_url, endpoint)
+
+  httr::GET(
+    target_endpoint,
+    encode = 'json',
+    query = query) %>%
+    httr::content() %>%
+    purrr::pluck("result")
+
+}
+```
+
+- https://dev.to/sm0ke/flask-dashboard-execution-with-docker-1e3k
