@@ -1,0 +1,90 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Monitor de Integridade {% endblock %}
+
+{% block content %}
+<div class="content">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title mb-0">Monitor de Integridade Pública</h3>
+          <p class="card-category mb-0">Consulta inicial por CPF/CNPJ no Portal da Transparência</p>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            <div class="form-group">
+              <label for="cpf_cnpj">CPF/CNPJ do político ou fornecedor</label>
+              <input
+                id="cpf_cnpj"
+                name="cpf_cnpj"
+                type="text"
+                class="form-control"
+                placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                value="{{ cpf_cnpj }}"
+                required
+              >
+            </div>
+            <button type="submit" class="btn btn-primary">Cruzar dados</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if resultado %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title mb-0">Resumo Consolidado</h4>
+        </div>
+        <div class="card-body">
+          {% if resultado.resumo.nivel_risco == 'alto' %}
+            <div class="alert alert-danger">
+              <strong>Risco: ALTO</strong>
+            </div>
+          {% elif resultado.resumo.nivel_risco == 'medio' %}
+            <div class="alert alert-warning">
+              <strong>Risco: MÉDIO</strong>
+            </div>
+          {% else %}
+            <div class="alert alert-success">
+              <strong>Risco: BAIXO</strong>
+            </div>
+          {% endif %}
+
+          <p class="mb-1">Documento consultado: <strong>{{ resultado.documento }}</strong></p>
+          <p class="mb-1">Fontes consultadas: <strong>{{ resultado.resumo.fontes_consultadas }}</strong></p>
+          <p class="mb-3">Total de registros: <strong>{{ resultado.resumo.total_registros }}</strong></p>
+
+          <ul>
+            {% for motivo in resultado.resumo.motivos %}
+              <li>{{ motivo }}</li>
+            {% endfor %}
+          </ul>
+
+          <hr>
+          <h5 class="mb-2">Portal da Transparência</h5>
+          {% if resultado.portal.ok %}
+            <p class="mb-2">Registros: <strong>{{ resultado.portal.total_registros }}</strong></p>
+            <pre class="bg-dark p-3 rounded" style="white-space: pre-wrap; word-break: break-word;">{{ resultado.portal.dados | tojson(indent=2) }}</pre>
+          {% else %}
+            <div class="alert alert-secondary mb-0">{{ resultado.portal.erro }}</div>
+          {% endif %}
+
+          <hr>
+          <h5 class="mb-2">CEIS (arquivo local)</h5>
+          {% if resultado.ceis.ok %}
+            <p class="mb-2">Registros: <strong>{{ resultado.ceis.total_registros }}</strong></p>
+            <pre class="bg-dark p-3 rounded" style="white-space: pre-wrap; word-break: break-word;">{{ resultado.ceis.dados | tojson(indent=2) }}</pre>
+          {% else %}
+            <div class="alert alert-secondary mb-0">{{ resultado.ceis.erro }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}

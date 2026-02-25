@@ -155,3 +155,15 @@ Para conectar o CPF às bases, o sistema focaria em três frentes:
 ### Próximo passo sugerido:
 
 **Você gostaria que eu esboçasse um script inicial em Python para cruzar uma amostra da base do CEIS (Empresas Inidôneas) com a base do PNCP (Contratos), para identificar esses casos de contratos firmados durante sanção?**
+
+pip install Flask
+
+$ python
+$ Python 3.7.2 ... on win32
+$ >>> from flask import Flask
+$ >>> 
+
+virtualenv --no-site-packages env
+$ source env/bin/activate
+$ # Install requirements
+$ pip3 install -r requirements.txt
