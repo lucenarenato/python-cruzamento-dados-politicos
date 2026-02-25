@@ -58,6 +58,7 @@ make up
 make scan
 make shell
 make logs
+make ps
 make down
 ```
 

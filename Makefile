@@ -1,4 +1,4 @@
-.PHONY: help build up scan shell logs down
+.PHONY: help build up scan shell logs ps down
 
 help:
 	@echo "Alvos disponíveis:"
@@ -7,6 +7,7 @@ help:
 	@echo "  make scan   - Executa scan avulso e remove container"
 	@echo "  make shell  - Abre shell interativo no container"
 	@echo "  make logs   - Exibe logs do serviço politicos"
+	@echo "  make ps     - Lista status dos serviços"
 	@echo "  make down   - Remove recursos do compose"
 
 build:
@@ -23,6 +24,9 @@ shell:
 
 logs:
 	docker compose --profile cli logs -f politicos
+
+ps:
+	docker compose ps
 
 down:
 	docker compose down --remove-orphans
