@@ -57,6 +57,7 @@ make build
 make up
 make scan
 make shell
+make logs
 make down
 ```
 
