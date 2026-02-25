@@ -7,7 +7,11 @@ import pandas as pd
 
 def load_csv(path: Path) -> pd.DataFrame:
     if not path.exists():
-        raise FileNotFoundError(f"Arquivo não encontrado: {path}")
+        raise FileNotFoundError(
+            "Arquivo não encontrado: "
+            f"{path}. "
+            "Crie os CSVs em data/raw ou rode `make init-data` para gerar exemplos."
+        )
     return pd.read_csv(path)
 
 

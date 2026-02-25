@@ -20,13 +20,13 @@ def find_contracts_during_sanction(
     contracts["doc_key"] = contracts["supplier_document"].map(_digits_only)
 
     sanctions["sanction_start"] = pd.to_datetime(
-        sanctions["sanction_start"], errors="coerce", dayfirst=True
+        sanctions["sanction_start"], errors="coerce", format="mixed", dayfirst=True
     )
     sanctions["sanction_end"] = pd.to_datetime(
-        sanctions["sanction_end"], errors="coerce", dayfirst=True
+        sanctions["sanction_end"], errors="coerce", format="mixed", dayfirst=True
     )
     contracts["contract_date"] = pd.to_datetime(
-        contracts["contract_date"], errors="coerce", dayfirst=True
+        contracts["contract_date"], errors="coerce", format="mixed", dayfirst=True
     )
 
     sanctions = sanctions[sanctions["doc_key"] != ""]

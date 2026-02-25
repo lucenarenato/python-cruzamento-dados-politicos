@@ -53,6 +53,7 @@ pip install -e .
 Atalhos com Makefile:
 
 ```bash
+make init-data
 make build
 make up
 make scan
@@ -66,6 +67,15 @@ Perfis disponíveis:
 
 - `cli`: execução do pipeline
 - `dev`: shell interativo
+
+Fluxo rápido recomendado para primeiro uso:
+
+```bash
+make init-data
+make up
+```
+
+O alvo `init-data` cria `data/raw/ceis.csv` e `data/raw/contracts.csv` com dados de exemplo (se ainda não existirem).
 
 Subir execução padrão (`scan-sanctions`):
 
