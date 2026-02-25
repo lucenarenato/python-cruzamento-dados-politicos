@@ -50,6 +50,16 @@ pip install -e .
 
 ## Rodando com Docker (local)
 
+Atalhos com Makefile:
+
+```bash
+make build
+make up
+make scan
+make shell
+make down
+```
+
 Perfis disponíveis:
 
 - `cli`: execução do pipeline
@@ -76,7 +86,7 @@ docker compose --profile dev run --rm dev-shell
 Opcional: sobrescrever variáveis sem criar `.env`:
 
 ```bash
-DATA_DIR=./data OUTPUT_DIR=./data/output docker compose run --rm politicos politicos scan-sanctions
+DATA_DIR=./data OUTPUT_DIR=./data/output docker compose --profile cli run --rm politicos politicos scan-sanctions
 ```
 
 ## Entradas esperadas (CSV)
