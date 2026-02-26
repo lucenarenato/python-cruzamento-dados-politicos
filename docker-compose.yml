@@ -1,35 +1,27 @@
+version: '3.8'
 services:
-  politicos:
-    profiles: ["cli"]
-    build:
-      context: .
-      dockerfile: dockerfile
-    working_dir: /app
-    environment:
-      DATA_DIR: ${DATA_DIR:-/app/data}
-      CEIS_CSV: ${CEIS_CSV:-/app/data/raw/ceis.csv}
-      CONTRACTS_CSV: ${CONTRACTS_CSV:-/app/data/raw/contracts.csv}
-      OUTPUT_DIR: ${OUTPUT_DIR:-/app/data/output}
+  appseed-app:
+    container_name: appseed_app
+    restart: always
+    build: .
+    networks:
+      - db_network
+      - web_network
+  nginx:
+    container_name: nginx
+    restart: always
+    image: "nginx:latest"
+    ports:
+      - "5085:5085"
     volumes:
-      - ./:/app
-    command: ["politicos", "scan-sanctions"]
-    restart: "no"
-
-  dev-shell:
-    profiles: ["dev"]
-    build:
-      context: .
-      dockerfile: dockerfile
-    working_dir: /app
-    environment:
-      DATA_DIR: ${DATA_DIR:-/app/data}
-      CEIS_CSV: ${CEIS_CSV:-/app/data/raw/ceis.csv}
-      CONTRACTS_CSV: ${CONTRACTS_CSV:-/app/data/raw/contracts.csv}
-      OUTPUT_DIR: ${OUTPUT_DIR:-/app/data/output}
-    volumes:
-      - ./:/app
-    entrypoint: ["bash"]
-    stdin_open: true
-    tty: true
-    restart: "no"
-
+      - ./nginx:/etc/nginx/conf.d
+    networks:
+      - web_network
+    depends_on: 
+      - appseed-app
+networks:
+  db_network:
+    driver: bridge
+  web_network:
+    driver: bridge
+ 
