@@ -15,6 +15,7 @@ services:
       - "5085:5085"
     volumes:
       - ./nginx:/etc/nginx/conf.d
+      - ./static:/static:ro
     networks:
       - web_network
     depends_on: 
