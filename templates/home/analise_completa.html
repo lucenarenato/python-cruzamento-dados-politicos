@@ -1,0 +1,399 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Análise Completa - Múltiplas Fontes {% endblock %}
+
+{% block content %}
+<div class="content">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title mb-2">Análise Completa de CPF/CNPJ</h3>
+          <p class="card-category mb-0">Consulta integrada em múltiplas bases de dados públicas</p>
+        </div>
+        <div class="card-body">
+          <form method="POST">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="form-group">
+                  <label for="cpf_cnpj">CPF ou CNPJ</label>
+                  <input
+                    id="cpf_cnpj"
+                    name="cpf_cnpj"
+                    type="text"
+                    class="form-control"
+                    placeholder="Digite apenas números: 00000000000 ou 00000000000000"
+                    value="{{ cpf_cnpj }}"
+                    required
+                  >
+                  <small class="form-text text-muted">
+                    Digite CPF (11 dígitos) ou CNPJ (14 dígitos) para consultar em todas as bases disponíveis
+                  </small>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label>&nbsp;</label><br>
+                <button type="submit" class="btn btn-primary btn-block">
+                  <i class="tim-icons icon-zoom-split"></i> Consultar Todas as Fontes
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if resultado %}
+  <div class="row">
+    <div class="col-12">
+      <!-- Card de Identificação -->
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">Dados do Documento</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <p class="mb-1"><strong>Tipo:</strong></p>
+              <h3>{{ resultado.tipo }}</h3>
+            </div>
+            <div class="col-md-8">
+              <p class="mb-1"><strong>Documento:</strong></p>
+              <h3><code>{{ resultado.documento_formatado }}</code></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card de Avaliação de Risco -->
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">Avaliação de Risco</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <p class="mb-1"><strong>Nível de Risco:</strong></p>
+              {% if resultado.avaliacao.nivel_risco == 'critico' %}
+                <h2 class="text-danger">
+                  <i class="tim-icons icon-alert-circle-exc"></i> CRÍTICO
+                </h2>
+              {% elif resultado.avaliacao.nivel_risco == 'alto' %}
+                <h2 class="text-warning">
+                  <i class="tim-icons icon-simple-remove"></i> ALTO
+                </h2>
+              {% elif resultado.avaliacao.nivel_risco == 'medio' %}
+                <h2 class="text-info">
+                  <i class="tim-icons icon-alert-circle-exc"></i> MÉDIO
+                </h2>
+              {% else %}
+                <h2 class="text-success">
+                  <i class="tim-icons icon-check-2"></i> BAIXO
+                </h2>
+              {% endif %}
+            </div>
+            <div class="col-md-3">
+              <p class="mb-1"><strong>Pontuação:</strong></p>
+              <h3>{{ resultado.avaliacao.pontuacao }} pontos</h3>
+            </div>
+            <div class="col-md-3">
+              <p class="mb-1"><strong>Fontes Consultadas:</strong></p>
+              <h3>{{ resultado.avaliacao.total_fontes_consultadas }}</h3>
+            </div>
+            <div class="col-md-3">
+              <p class="mb-1"><strong>Fontes com Dados:</strong></p>
+              <h3>{{ resultado.avaliacao.fontes_com_dados }}</h3>
+            </div>
+          </div>
+          
+          {% if resultado.avaliacao.alertas %}
+          <hr>
+          <h5 class="mb-3">Alertas Detectados:</h5>
+          <ul class="list-group">
+            {% for alerta in resultado.avaliacao.alertas %}
+            <li class="list-group-item">
+              <i class="tim-icons icon-alert-circle-exc text-warning"></i>
+              {{ alerta }}
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Resultados por Fonte -->
+      <div class="row">
+        <!-- CEIS -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="tim-icons icon-alert-circle-exc"></i>
+                CEIS - Empresas Inidôneas
+              </h5>
+            </div>
+            <div class="card-body">
+              {% if resultado.fontes.ceis.ok %}
+                {% if resultado.fontes.ceis.total > 0 %}
+                  <div class="alert alert-danger">
+                    <strong>{{ resultado.fontes.ceis.total }} registro(s) encontrado(s)</strong>
+                  </div>
+                  <pre class="bg-dark p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 12px;">{{ resultado.fontes.ceis.dados | tojson(indent=2) }}</pre>
+                {% else %}
+                  <div class="alert alert-success">
+                    <i class="tim-icons icon-check-2"></i>
+                    Nenhum registro encontrado
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="alert alert-secondary">
+                  <strong>Erro:</strong> {{ resultado.fontes.ceis.erro }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- CNEP -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="tim-icons icon-simple-remove"></i>
+                CNEP - Empresas Punidas
+              </h5>
+            </div>
+            <div class="card-body">
+              {% if resultado.fontes.cnep.ok %}
+                {% if resultado.fontes.cnep.total > 0 %}
+                  <div class="alert alert-danger">
+                    <strong>{{ resultado.fontes.cnep.total }} registro(s) encontrado(s)</strong>
+                  </div>
+                  <pre class="bg-dark p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 12px;">{{ resultado.fontes.cnep.dados | tojson(indent=2) }}</pre>
+                {% else %}
+                  <div class="alert alert-success">
+                    <i class="tim-icons icon-check-2"></i>
+                    Nenhum registro encontrado
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="alert alert-secondary">
+                  <strong>Erro:</strong> {{ resultado.fontes.cnep.erro }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- CEPIM -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="tim-icons icon-lock-circle"></i>
+                CEPIM - Impedidos de Licitar
+              </h5>
+            </div>
+            <div class="card-body">
+              {% if resultado.fontes.cepim.ok %}
+                {% if resultado.fontes.cepim.total > 0 %}
+                  <div class="alert alert-warning">
+                    <strong>{{ resultado.fontes.cepim.total }} registro(s) encontrado(s)</strong>
+                  </div>
+                  <pre class="bg-dark p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 12px;">{{ resultado.fontes.cepim.dados | tojson(indent=2) }}</pre>
+                {% else %}
+                  <div class="alert alert-success">
+                    <i class="tim-icons icon-check-2"></i>
+                    Nenhum registro encontrado
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="alert alert-secondary">
+                  <strong>Erro:</strong> {{ resultado.fontes.cepim.erro }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Contratos -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="tim-icons icon-paper"></i>
+                Contratos Federais
+              </h5>
+            </div>
+            <div class="card-body">
+              {% if resultado.fontes.contratos.ok %}
+                {% if resultado.fontes.contratos.total > 0 %}
+                  <div class="alert alert-info">
+                    <strong>{{ resultado.fontes.contratos.total }} contrato(s) encontrado(s)</strong>
+                  </div>
+                  <pre class="bg-dark p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 12px;">{{ resultado.fontes.contratos.dados | tojson(indent=2) }}</pre>
+                {% else %}
+                  <div class="alert alert-secondary">
+                    <i class="tim-icons icon-simple-delete"></i>
+                    Nenhum contrato encontrado
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="alert alert-secondary">
+                  <strong>Erro:</strong> {{ resultado.fontes.contratos.erro }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Convênios -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="tim-icons icon-notes"></i>
+                Convênios
+              </h5>
+            </div>
+            <div class="card-body">
+              {% if resultado.fontes.convenios.ok %}
+                {% if resultado.fontes.convenios.total > 0 %}
+                  <div class="alert alert-info">
+                    <strong>{{ resultado.fontes.convenios.total }} convênio(s) encontrado(s)</strong>
+                  </div>
+                  <pre class="bg-dark p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 12px;">{{ resultado.fontes.convenios.dados | tojson(indent=2) }}</pre>
+                {% else %}
+                  <div class="alert alert-secondary">
+                    <i class="tim-icons icon-simple-delete"></i>
+                    Nenhum convênio encontrado
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="alert alert-secondary">
+                  <strong>Erro:</strong> {{ resultado.fontes.convenios.erro }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Receita Federal (CNPJ) -->
+        {% if resultado.tipo == 'CNPJ' and resultado.fontes.receita_federal %}
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="tim-icons icon-bank"></i>
+                Receita Federal - Dados do CNPJ
+              </h5>
+            </div>
+            <div class="card-body">
+              {% if resultado.fontes.receita_federal.ok %}
+                <div class="alert alert-success">
+                  <strong>Dados encontrados</strong>
+                </div>
+                <pre class="bg-dark p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 12px;">{{ resultado.fontes.receita_federal.dados | tojson(indent=2) }}</pre>
+                
+                {% if resultado.fontes.receita_federal.qsa %}
+                <hr>
+                <h6>Quadro de Sócios e Administradores (QSA):</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Nome</th>
+                        <th>Qualificação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for socio in resultado.fontes.receita_federal.qsa %}
+                      <tr>
+                        <td>{{ socio.nome }}</td>
+                        <td>{{ socio.qual }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                {% endif %}
+              {% else %}
+                <div class="alert alert-secondary">
+                  <strong>Erro:</strong> {{ resultado.fontes.receita_federal.erro }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- PNCP -->
+        {% if resultado.tipo == 'CNPJ' and resultado.fontes.pncp %}
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="tim-icons icon-cart"></i>
+                PNCP - Portal de Contratações
+              </h5>
+            </div>
+            <div class="card-body">
+              {% if resultado.fontes.pncp.ok %}
+                {% if resultado.fontes.pncp.total > 0 %}
+                  <div class="alert alert-info">
+                    <strong>{{ resultado.fontes.pncp.total }} contrato(s) encontrado(s)</strong>
+                  </div>
+                  <pre class="bg-dark p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 12px;">{{ resultado.fontes.pncp.dados | tojson(indent=2) }}</pre>
+                {% else %}
+                  <div class="alert alert-secondary">
+                    <i class="tim-icons icon-simple-delete"></i>
+                    {{ resultado.fontes.pncp.mensagem or "Nenhum contrato encontrado" }}
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="alert alert-secondary">
+                  <strong>Erro:</strong> {{ resultado.fontes.pncp.erro }}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- TSE (CPF) -->
+        {% if resultado.tipo == 'CPF' %}
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="tim-icons icon-badge"></i>
+                TSE - Tribunal Superior Eleitoral
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-warning">
+                <i class="tim-icons icon-bulb-63"></i>
+                <strong>Informação:</strong> Os dados do TSE requerem download prévio das bases de candidaturas, bens e doações.
+                Acesse <a href="https://dadosabertos.tse.jus.br/" target="_blank" class="alert-link">https://dadosabertos.tse.jus.br/</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+// Máscara de CPF/CNPJ
+document.getElementById('cpf_cnpj').addEventListener('input', function(e) {
+  let value = e.target.value.replace(/\D/g, '');
+  e.target.value = value;
+});
+</script>
+{% endblock %}
