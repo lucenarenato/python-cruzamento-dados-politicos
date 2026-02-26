@@ -32,6 +32,16 @@
     </div>
   </div>
 
+  {% if erro %}
+  <div class="row">
+    <div class="col-12">
+      <div class="alert alert-danger">
+        <strong>Erro:</strong> {{ erro }}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if resultado %}
   <div class="row">
     <div class="col-12">
@@ -67,19 +77,27 @@
           <hr>
           <h5 class="mb-2">Portal da Transparência</h5>
           {% if resultado.portal.ok %}
-            <p class="mb-2">Registros: <strong>{{ resultado.portal.total_registros }}</strong></p>
-            <pre class="bg-dark p-3 rounded" style="white-space: pre-wrap; word-break: break-word;">{{ resultado.portal.dados | tojson(indent=2) }}</pre>
+            <p class="mb-2">Registros: <strong>{{ resultado.portal.get('total_registros', 0) }}</strong></p>
+            {% if resultado.portal.dados %}
+              <pre class="bg-dark p-3 rounded" style="white-space: pre-wrap; word-break: break-word;">{{ resultado.portal.dados | tojson(indent=2) }}</pre>
+            {% else %}
+              <p class="text-muted">Nenhum dado encontrado</p>
+            {% endif %}
           {% else %}
-            <div class="alert alert-secondary mb-0">{{ resultado.portal.erro }}</div>
+            <div class="alert alert-secondary mb-0">{{ resultado.portal.get('erro', 'Erro desconhecido') }}</div>
           {% endif %}
 
           <hr>
           <h5 class="mb-2">CEIS (arquivo local)</h5>
           {% if resultado.ceis.ok %}
-            <p class="mb-2">Registros: <strong>{{ resultado.ceis.total_registros }}</strong></p>
-            <pre class="bg-dark p-3 rounded" style="white-space: pre-wrap; word-break: break-word;">{{ resultado.ceis.dados | tojson(indent=2) }}</pre>
+            <p class="mb-2">Registros: <strong>{{ resultado.ceis.get('total_registros', 0) }}</strong></p>
+            {% if resultado.ceis.dados %}
+              <pre class="bg-dark p-3 rounded" style="white-space: pre-wrap; word-break: break-word;">{{ resultado.ceis.dados | tojson(indent=2) }}</pre>
+            {% else %}
+              <p class="text-muted">Nenhum dado encontrado</p>
+            {% endif %}
           {% else %}
-            <div class="alert alert-secondary mb-0">{{ resultado.ceis.erro }}</div>
+            <div class="alert alert-secondary mb-0">{{ resultado.ceis.get('erro', 'Erro desconhecido') }}</div>
           {% endif %}
         </div>
       </div>

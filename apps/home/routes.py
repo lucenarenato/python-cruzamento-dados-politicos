@@ -46,16 +46,21 @@ def index():
 def monitor_integridade():
     resultado = None
     cpf_cnpj = ""
+    erro = None
 
     if request.method == 'POST':
         cpf_cnpj = request.form.get('cpf_cnpj', '').strip()
-        resultado = analisar_integridade(cpf_cnpj)
+        try:
+            resultado = analisar_integridade(cpf_cnpj)
+        except Exception as e:
+            erro = f"Erro ao processar consulta: {str(e)}"
 
     return render_template(
         'home/monitor_integridade.html',
         segment='monitor_integridade',
         resultado=resultado,
         cpf_cnpj=cpf_cnpj,
+        erro=erro
     )
 
 
