@@ -123,7 +123,7 @@ python run.py
 python run.py
 ```
 
-Acesse: `http://localhost:5000`
+Acesse: `http://localhost:5085`
 
 ## 📡 APIs Utilizadas
 

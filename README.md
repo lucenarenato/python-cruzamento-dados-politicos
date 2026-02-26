@@ -48,7 +48,7 @@ python populate_db.py
 python run.py
 ```
 
-Acesse: **http://localhost:5000**
+Acesse: **http://localhost:5085**
 
 ## 📚 Documentação
 
@@ -181,7 +181,7 @@ GET /api/consultar/<cpf_cnpj>
 
 **Exemplo:**
 ```bash
-curl http://localhost:5000/api/consultar/12345678000190
+curl http://localhost:5085/api/consultar/12345678000190
 ```
 
 **Resposta:**
@@ -243,10 +243,10 @@ for padrao in padroes:
 
 ```bash
 # Consultar empresa
-curl -s http://localhost:5000/api/consultar/12345678000190 | jq '.avaliacao'
+curl -s http://localhost:5085/api/consultar/12345678000190 | jq '.avaliacao'
 
 # Obter estatísticas
-curl -s http://localhost:5000/api/estatisticas | jq '.total_irregularidades'
+curl -s http://localhost:5085/api/estatisticas | jq '.total_irregularidades'
 ```
 
 ## 📊 Níveis de Risco
@@ -268,7 +268,7 @@ docker build -t cruzamento-dados .
 
 # Executar container
 docker run -d \
-	-p 5000:5000 \
+	-p 5085:5000 \
 	-e TRANSPARENCIA_API_KEY=sua_chave \
 	--name cruzamento-dados \
 	cruzamento-dados

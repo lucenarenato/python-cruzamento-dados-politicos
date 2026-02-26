@@ -156,3 +156,44 @@ Para conectar o CPF às bases, o sistema focaria em três frentes:
 
 **Você gostaria que eu esboçasse um script inicial em Python para cruzar uma amostra da base do CEIS (Empresas Inidôneas) com a base do PNCP (Contratos), para identificar esses casos de contratos firmados durante sanção?**
 
+ ibge_api_base_url: str = "https://servicodados.ibge.gov.br/api/v1/localidades"
+    tse_ckan_base_url: str = "https://dadosabertos.tse.jus.br/api/3/action"
+    portal_transparencia_api_base_url: str = "https://api.portaldatransparencia.gov.br/api-de-dados"
+    portal_transparencia_api_key: str | None = None
+    mte_ftp_host: str = "ftp.mtps.gov.br"
+    mte_ftp_port: int = 21
+    mte_ftp_root_candidates: str = "/pdet/microdados/NOVO CAGED,/pdet/microdados/NOVO_CAGED"
+    mte_ftp_max_depth: int = 4
+    mte_ftp_max_dirs: int = 300
+
+- https://api.portaldatransparencia.gov.br/swagger-ui/index.html
+- https://portaldatransparencia.gov.br/api-de-dados/cadastrar-email
+
+A fim de garantir a estabilidade do ambiente, os seguintes limites são definidos:
+
+De 00:00 às 06:00: até 700 requisições por minuto
+Nos demais horários: 400 requisições por minuto
+APIs restritas: 180 requisições por minuto.
+As APIs restritas são:
+
+/api-de-dados/despesas/documentos-por-favorecido
+/api-de-dados/bolsa-familia-disponivel-por-cpf-ou-nis
+/api-de-dados/bolsa-familia-por-municipio
+/api-de-dados/bolsa-familia-sacado-por-nis
+/api-de-dados/auxilio-emergencial-beneficiario-por-municipio
+/api-de-dados/auxilio-emergencial-por-cpf-ou-nis
+/api-de-dados/auxilio-emergencial-por-municipio
+/api-de-dados/seguro-defeso-codigo
+Usos acima desses limites terão o token suspenso por 0 hora(s).
+
+env
+
+IBGE_API_BASE_URL=https://servicodados.ibge.gov.br/api/v1/localidades
+TSE_CKAN_BASE_URL=https://dadosabertos.tse.jus.br/api/3/action
+PORTAL_TRANSPARENCIA_API_BASE_URL=https://api.portaldatransparencia.gov.br/api-de-dados
+PORTAL_TRANSPARENCIA_API_KEY=
+MTE_FTP_HOST=ftp.mtps.gov.br
+MTE_FTP_PORT=21
+MTE_FTP_ROOT_CANDIDATES=/pdet/microdados/NOVO CAGED,/pdet/microdados/NOVO_CAGED
+MTE_FTP_MAX_DEPTH=4
+MTE_FTP_MAX_DIRS=300

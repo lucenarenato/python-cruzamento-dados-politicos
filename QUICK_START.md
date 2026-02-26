@@ -27,7 +27,7 @@ nano .env  # Adicione sua TRANSPARENCIA_API_KEY
 python run.py
 ```
 
-Acesse: http://localhost:5000
+Acesse: http://localhost:5085
 
 ### 3. Faça Login
 
@@ -255,7 +255,7 @@ python scripts/update_databases.py
 ### 1. Consultas em Lote
 Use a API JSON:
 ```bash
-curl http://localhost:5000/api/consultar/12345678000190
+curl http://localhost:5085/api/consultar/12345678000190
 ```
 
 ### 2. Automatizar Análises
