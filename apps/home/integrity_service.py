@@ -52,17 +52,20 @@ def consultar_portal_transparencia(documento: str) -> dict[str, Any]:
         }
     except HTTPError as exc:
         details = exc.read().decode("utf-8", errors="ignore")
+        print(f"[DEBUG] HTTPError {exc.code}: {details}")
         return {
             "ok": False,
             "erro": f"Erro HTTP {exc.code} ao consultar API.",
             "detalhes": details,
         }
     except URLError as exc:
+        print(f"[DEBUG] URLError: {exc.reason}")
         return {
             "ok": False,
             "erro": f"Falha de conexão com a API: {exc.reason}",
         }
     except json.JSONDecodeError:
+        print(f"[DEBUG] JSONDecodeError: Resposta não é JSON válido")
         return {
             "ok": False,
             "erro": "A API retornou conteúdo inválido (não JSON).",
@@ -70,7 +73,8 @@ def consultar_portal_transparencia(documento: str) -> dict[str, Any]:
 
 
 def _default_ceis_csv_path() -> Path:
-    return Path(__file__).resolve().parents[3] / "data" / "raw" / "ceis.csv"
+    # Navega até a raiz do projeto: integrity_service.py -> home -> apps -> projeto_root
+    return Path(__file__).resolve().parents[2] / "data" / "raw" / "ceis.csv"
 
 
 def consultar_ceis_local(documento: str) -> dict[str, Any]:

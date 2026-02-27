@@ -1,0 +1,106 @@
+
+    <div class="sidebar">
+        <!--
+          Tip 1: You can change the color of the sidebar using: data-color="blue | green | orange | red"
+      -->
+        <div class="sidebar-wrapper">
+            <div class="logo">
+                <a href="javascript:void(0)" class="simple-text logo-mini">
+                    CD
+                </a>
+                <a href="javascript:void(0)" class="simple-text logo-normal">
+                    Cruzamento Dados
+                </a>
+            </div>
+            <ul class="nav">
+                <li class="{% if 'index' in segment %} active {% endif %} ">
+                    <a href="/">
+                        <i class="tim-icons icon-chart-pie-36"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+
+                <li>
+                    <a data-toggle="collapse" href="#analiseMenu" aria-expanded="false">
+                        <i class="tim-icons icon-zoom-split"></i>
+                        <p>Análises
+                            <b class="caret"></b>
+                        </p>
+                    </a>
+                    <div class="collapse" id="analiseMenu">
+                        <ul class="nav">
+                            <li class="{% if 'monitor_integridade' in segment %} active {% endif %}">
+                                <a href="{{ url_for('home_blueprint.monitor_integridade') }}">
+                                    <span class="sidebar-mini-icon">MI</span>
+                                    <span class="sidebar-normal">Monitor Integridade</span>
+                                </a>
+                            </li>
+                            <li class="{% if 'analise_completa' in segment %} active {% endif %}">
+                                <a href="{{ url_for('home_blueprint.analise_completa') }}">
+                                    <span class="sidebar-mini-icon">AC</span>
+                                    <span class="sidebar-normal">Análise Completa</span>
+                                </a>
+                            </li>
+                            <li class="{% if 'sancoes_contratos' in segment %} active {% endif %}">
+                                <a href="{{ url_for('home_blueprint.sancoes_contratos') }}">
+                                    <span class="sidebar-mini-icon">SC</span>
+                                    <span class="sidebar-normal">Sanções vs Contratos</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="{% if 'dynamic_dt' in segment %} active {% endif %}">
+                    <a href="{{ url_for('table_blueprint.dynamic_dt') }}">
+                      <i class="tim-icons icon-puzzle-10"></i>
+                      <p>Tabelas Dinâmicas</p>
+                    </a>
+                </li>    
+                <li class="{% if 'charts' in segment %} active {% endif %}">
+                    <a href="{{ url_for('charts_blueprint.charts') }}">
+                      <i class="tim-icons icon-chart-bar-32"></i>
+                      <p>Gráficos</p>
+                    </a>
+                </li>  
+
+                <li>
+                    <a data-toggle="collapse" href="#formsMenu" aria-expanded="false">
+                        <i class="tim-icons icon-notes"></i>
+                        <p>Páginas
+                            <b class="caret"></b>
+                        </p>
+                    </a>
+                    <div class="collapse" id="formsMenu">
+                        <ul class="nav">
+                            <li class="{% if 'user' in segment %} active {% endif %}">
+                                <a href="/user.html">
+                                    <span class="sidebar-mini-icon">UP</span>
+                                    <span class="sidebar-normal">Perfil</span>
+                                </a>
+                            </li>
+                            <li class="{% if 'icons' in segment %} active {% endif %}">
+                                <a href="/icons.html">
+                                    <span class="sidebar-mini-icon">IC</span>
+                                    <span class="sidebar-normal">Ícones</span>
+                                </a>
+                            </li>
+                            <li class="{% if 'tables' in segment %} active {% endif %}">
+                                <a href="/tables.html">
+                                    <span class="sidebar-mini-icon">TL</span>
+                                    <span class="sidebar-normal">Tabelas</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="{{ url_for('authentication_blueprint.logout') }}">
+                        <i class="tim-icons icon-button-power"></i>
+                        <p>Sair</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>

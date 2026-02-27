@@ -12,13 +12,8 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY env.sample .env
-
+# Copy application files
 COPY . .
-
-RUN flask db init
-RUN flask db migrate
-RUN flask db upgrade
 
 # gunicorn
 CMD ["gunicorn", "--config", "gunicorn-cfg.py", "run:app"]

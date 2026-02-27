@@ -1,0 +1,3 @@
+source_id,supplier_document,supplier_name,contract_date,contract_value,contract_number,organ
+PNCP,12345678000190,Empresa Exemplo Sancionada,2025-06-10,150000.00,CONTR-001,MINISTERIO X
+PNCP,00999999000100,Fornecedor Regular,2025-06-10,50000.00,CONTR-002,MINISTERIO Y
