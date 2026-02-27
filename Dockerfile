@@ -15,9 +15,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY . .
 
-RUN flask db init
-RUN flask db migrate
-RUN flask db upgrade
-
 # gunicorn
 CMD ["gunicorn", "--config", "gunicorn-cfg.py", "run:app"]
