@@ -104,5 +104,75 @@
     </div>
   </div>
   {% endif %}
-</div>
+
+  {% if historico %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title mb-0">Histórico de Consultas</h4>
+          <p class="card-category mb-0">Últimas consultas para este documento</p>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Nível de Risco</th>
+                  <th>CEIS</th>
+                  <th>Portal</th>
+                  <th>Detalhes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for consulta in historico %}
+                <tr>
+                  <td>
+                    <small>{{ consulta.data_consulta.strftime('%d/%m/%Y %H:%M:%S') if consulta.data_consulta else 'N/A' }}</small>
+                  </td>
+                  <td>
+                    {% if consulta.nivel_risco.value == 'critico' %}
+                      <span class="badge badge-danger">{{ consulta.nivel_risco.value | upper }}</span>
+                    {% elif consulta.nivel_risco.value == 'alto' %}
+                      <span class="badge badge-danger">{{ consulta.nivel_risco.value | upper }}</span>
+                    {% elif consulta.nivel_risco.value == 'medio' %}
+                      <span class="badge badge-warning">{{ consulta.nivel_risco.value | upper }}</span>
+                    {% else %}
+                      <span class="badge badge-success">{{ consulta.nivel_risco.value | upper }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if consulta.encontrado_ceis %}
+                      <span class="badge badge-danger">Encontrado</span>
+                    {% else %}
+                      <span class="badge badge-success">Não</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if consulta.encontrado_portal %}
+                      <span class="badge badge-warning">Encontrado</span>
+                    {% else %}
+                      <span class="badge badge-success">Não</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <small class="text-muted">
+                      {% if consulta.usuario_id %}
+                        Por usuário #{{ consulta.usuario_id }}
+                      {% else %}
+                        Consulta pública
+                      {% endif %}
+                    </small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}</div>
 {% endblock content %}

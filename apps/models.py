@@ -206,3 +206,59 @@ class PoliticoProfile(db.Model):
     @classmethod
     def get_all_active(cls):
         return cls.query.filter_by(situacao='Eleito').all()
+
+class ConsultaIntegridade(db.Model):
+    """Histórico de consultas feitas através do monitor de integridade"""
+    
+    __tablename__ = 'consultas_integridade'
+
+    id = db.Column(db.Integer, primary_key=True)
+    cpf_cnpj = db.Column(db.String(14), nullable=False, index=True)
+    tipo_documento = db.Column(db.String(3), nullable=False)  # 'CPF' ou 'CNPJ'
+    
+    # Resultado da consulta
+    nivel_risco = db.Column(db.Enum(RISK_LEVEL), nullable=False)
+    encontrado_ceis = db.Column(db.Boolean, default=False)
+    encontrado_portal = db.Column(db.Boolean, default=False)
+    
+    # Dados detalhados (JSON para flexibilidade)
+    dados_ceis = db.Column(db.JSON)  # Lista de registros CEIS encontrados
+    dados_portal = db.Column(db.JSON)  # Dados do Portal da Transparência
+    resultado_completo = db.Column(db.JSON)  # Resultado completo da análise
+    
+    # Metadados da consulta
+    data_consulta = db.Column(db.DateTime, default=dt.datetime.utcnow, index=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    ip_origem = db.Column(db.String(45))  # IPv4 ou IPv6
+    
+    def __repr__(self):
+        return f"<ConsultaIntegridade {self.cpf_cnpj} - {self.nivel_risco.value} - {self.data_consulta}>"
+    
+    @classmethod
+    def find_by_cpf_cnpj(cls, documento: str) -> list:
+        """Retorna todas as consultas para um documento"""
+        if not documento or not isinstance(documento, str) or len(documento.strip()) == 0:
+            return []
+        return cls.query.filter_by(cpf_cnpj=documento.strip()).order_by(cls.data_consulta.desc()).all()
+    
+    @classmethod
+    def get_recent(cls, dias: int = 30) -> list:
+        """Retorna consultas dos últimos N dias"""
+        desde = dt.datetime.utcnow() - dt.timedelta(days=dias)
+        return cls.query.filter(cls.data_consulta >= desde).order_by(cls.data_consulta.desc()).all()
+    
+    @classmethod
+    def get_by_risk_level(cls, nivel: RISK_LEVEL) -> list:
+        """Retorna consultas com determinado nível de risco"""
+        return cls.query.filter_by(nivel_risco=nivel).order_by(cls.data_consulta.desc()).all()
+    
+    def save(self) -> None:
+        """Salva a consulta no banco de dados"""
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            db.session.close()
+            error = str(e.__dict__['orig'])
+            raise InvalidUsage(error, 422)

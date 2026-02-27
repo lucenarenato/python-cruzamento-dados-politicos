@@ -1,0 +1,2 @@
+source_id,cnpj_cpf,name,sanction_start,sanction_end,sanction_type
+CEIS,12345678000190,Empresa Exemplo Sancionada,2025-01-01,2026-12-31,INIDONEIDADE
