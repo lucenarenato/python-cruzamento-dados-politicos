@@ -262,3 +262,90 @@ class ConsultaIntegridade(db.Model):
             db.session.close()
             error = str(e.__dict__['orig'])
             raise InvalidUsage(error, 422)
+
+
+class AnaliseCompleta(db.Model):
+    """Histórico de análises completas (múltiplas fontes)"""
+    
+    __tablename__ = 'analises_completas'
+
+    id = db.Column(db.Integer, primary_key=True)
+    cpf_cnpj = db.Column(db.String(14), nullable=False, index=True)
+    tipo_documento = db.Column(db.String(4), nullable=False)  # 'CPF' ou 'CNPJ'
+    
+    # Resultado da análise
+    nivel_risco = db.Column(db.Enum(RISK_LEVEL), nullable=False)
+    pontuacao_risco = db.Column(db.Integer, default=0)
+    
+    # Contadores de registros encontrados por fonte
+    total_ceis = db.Column(db.Integer, default=0)
+    total_cnep = db.Column(db.Integer, default=0)
+    total_cepim = db.Column(db.Integer, default=0)
+    total_contratos = db.Column(db.Integer, default=0)
+    total_convenios = db.Column(db.Integer, default=0)
+    total_pncp = db.Column(db.Integer, default=0)
+    
+    # Dados detalhados de cada fonte (JSON)
+    dados_ceis = db.Column(db.JSON)
+    dados_cnep = db.Column(db.JSON)
+    dados_cepim = db.Column(db.JSON)
+    dados_contratos = db.Column(db.JSON)
+    dados_convenios = db.Column(db.JSON)
+    dados_pncp = db.Column(db.JSON)
+    dados_receita_federal = db.Column(db.JSON)
+    dados_tse = db.Column(db.JSON)
+    
+    # Resultado completo e avaliação
+    resultado_completo = db.Column(db.JSON)
+    avaliacao = db.Column(db.JSON)
+    alertas = db.Column(db.JSON)  # Lista de alertas
+    
+    # Metadados da consulta
+    data_consulta = db.Column(db.DateTime, default=dt.datetime.utcnow, index=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    ip_origem = db.Column(db.String(45))
+    
+    def __repr__(self):
+        return f"<AnaliseCompleta {self.cpf_cnpj} - {self.nivel_risco.value} - {self.data_consulta}>"
+    
+    @classmethod
+    def find_by_cpf_cnpj(cls, documento: str) -> list:
+        """Retorna todas as análises para um documento"""
+        if not documento or not isinstance(documento, str) or len(documento.strip()) == 0:
+            return []
+        return cls.query.filter_by(cpf_cnpj=documento.strip()).order_by(cls.data_consulta.desc()).all()
+    
+    @classmethod
+    def get_recent(cls, dias: int = 30) -> list:
+        """Retorna análises dos últimos N dias"""
+        desde = dt.datetime.utcnow() - dt.timedelta(days=dias)
+        return cls.query.filter(cls.data_consulta >= desde).order_by(cls.data_consulta.desc()).all()
+    
+    @classmethod
+    def get_by_risk_level(cls, nivel: RISK_LEVEL) -> list:
+        """Retorna análises com determinado nível de risco"""
+        return cls.query.filter_by(nivel_risco=nivel).order_by(cls.data_consulta.desc()).all()
+    
+    @classmethod
+    def get_with_sanctions(cls) -> list:
+        """Retorna análises que encontraram sanções (CEIS, CNEP ou CEPIM)"""
+        return cls.query.filter(
+            db.or_(
+                cls.total_ceis > 0,
+                cls.total_cnep > 0,
+                cls.total_cepim > 0
+            )
+        ).order_by(cls.data_consulta.desc()).all()
+    
+    def save(self) -> None:
+        """Salva a análise no banco de dados"""
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            db.session.close()
+            error = str(e.__dict__['orig'])
+            raise InvalidUsage(error, 422)
+            error = str(e.__dict__['orig'])
+            raise InvalidUsage(error, 422)

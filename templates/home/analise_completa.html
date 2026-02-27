@@ -44,6 +44,17 @@
     </div>
   </div>
 
+  {% if erro %}
+  <div class="row">
+    <div class="col-12">
+      <div class="alert alert-danger">
+        <i class="tim-icons icon-alert-circle-exc"></i>
+        <strong>Erro:</strong> {{ erro }}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if resultado %}
   <div class="row">
     <div class="col-12">
@@ -381,6 +392,114 @@
           </div>
         </div>
         {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if historico %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title mb-0">
+            <i class="tim-icons icon-time-alarm"></i>
+            Histórico de Análises
+          </h4>
+          <p class="card-category mb-0">Últimas análises completas para este documento</p>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Risco</th>
+                  <th>CEIS</th>
+                  <th>CNEP</th>
+                  <th>CEPIM</th>
+                  <th>Contratos</th>
+                  <th>Convênios</th>
+                  <th>Usuário</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for analise in historico %}
+                <tr>
+                  <td>
+                    <small>{{ analise.data_consulta.strftime('%d/%m/%Y %H:%M') if analise.data_consulta else 'N/A' }}</small>
+                  </td>
+                  <td>
+                    {% if analise.nivel_risco.value == 'critico' %}
+                      <span class="badge badge-danger">CRÍTICO</span>
+                    {% elif analise.nivel_risco.value == 'alto' %}
+                      <span class="badge badge-danger">ALTO</span>
+                    {% elif analise.nivel_risco.value == 'medio' %}
+                      <span class="badge badge-warning">MÉDIO</span>
+                    {% else %}
+                      <span class="badge badge-success">BAIXO</span>
+                    {% endif %}
+                    <small class="text-muted d-block">{{ analise.pontuacao_risco }} pts</small>
+                  </td>
+                  <td>
+                    {% if analise.total_ceis > 0 %}
+                      <span class="badge badge-danger">{{ analise.total_ceis }}</span>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if analise.total_cnep > 0 %}
+                      <span class="badge badge-danger">{{ analise.total_cnep }}</span>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if analise.total_cepim > 0 %}
+                      <span class="badge badge-warning">{{ analise.total_cepim }}</span>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if analise.total_contratos > 0 %}
+                      <span class="badge badge-info">{{ analise.total_contratos }}</span>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if analise.total_convenios > 0 %}
+                      <span class="badge badge-info">{{ analise.total_convenios }}</span>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <small class="text-muted">
+                      {% if analise.usuario_id %}
+                        #{{ analise.usuario_id }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          
+          {% if historico|length > 0 %}
+          <div class="mt-3">
+            <small class="text-muted">
+              <i class="tim-icons icon-bulb-63"></i>
+              Total de {{ historico|length }} análise(s) registrada(s) para este documento.
+            </small>
+          </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>

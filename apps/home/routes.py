@@ -16,7 +16,7 @@ from apps.home.data_crossing_service import (
     analisar_dados_locais,
     detectar_padroes_suspeitos
 )
-from apps.models import ConsultaIntegridade, RISK_LEVEL
+from apps.models import ConsultaIntegridade, AnaliseCompleta, RISK_LEVEL
 from apps import db
 
 def _determinar_tipo_documento(documento: str) -> str:
@@ -151,30 +151,112 @@ def analise_completa():
     """Análise completa consultando múltiplas APIs"""
     resultado = None
     cpf_cnpj = ""
+    erro = None
+    historico = []
 
-    if request.method == 'POST':
-        cpf_cnpj = request.form.get('cpf_cnpj', '').strip()
-        
-        # Consultar múltiplas fontes
-        dados = consultar_multiplas_fontes(cpf_cnpj)
-        
-        # Calcular nível de risco
-        avaliacao = calcular_nivel_risco(dados)
-        
-        resultado = {
-            "documento": dados.get("documento"),
-            "tipo": dados.get("tipo"),
-            "documento_formatado": dados.get("documento_formatado"),
-            "fontes": dados.get("fontes", {}),
-            "avaliacao": avaliacao
-        }
+    try:
+        if request.method == 'POST':
+            cpf_cnpj = request.form.get('cpf_cnpj', '').strip()
+            cpf_cnpj_limpo = re.sub(r'\D', '', cpf_cnpj)
+            
+            try:
+                print(f"[ANALISE] Iniciando análise completa para: {cpf_cnpj}")
+                
+                # Consultar múltiplas fontes
+                dados = consultar_multiplas_fontes(cpf_cnpj)
+                
+                # Calcular nível de risco
+                avaliacao = calcular_nivel_risco(dados)
+                
+                resultado = {
+                    "documento": dados.get("documento"),
+                    "tipo": dados.get("tipo"),
+                    "documento_formatado": dados.get("documento_formatado"),
+                    "fontes": dados.get("fontes", {}),
+                    "avaliacao": avaliacao
+                }
+                
+                print(f"[ANALISE] Análise concluída - Nível de risco: {avaliacao.get('nivel_risco')}")
+                
+                # Determinar nível de risco
+                nivel_risco_str = avaliacao.get('nivel_risco', 'medio')
+                try:
+                    nivel_risco = RISK_LEVEL[nivel_risco_str]
+                except KeyError:
+                    nivel_risco = RISK_LEVEL.medio
+                
+                # Extrair contadores de registros
+                fontes = dados.get("fontes", {})
+                
+                # Criar registro de análise
+                print(f"[ANALISE] Salvando análise no banco de dados")
+                analise = AnaliseCompleta(
+                    cpf_cnpj=cpf_cnpj_limpo,
+                    tipo_documento=dados.get("tipo", "DESCONHECIDO"),
+                    nivel_risco=nivel_risco,
+                    pontuacao_risco=avaliacao.get('pontuacao', 0),
+                    total_ceis=fontes.get("ceis", {}).get("total", 0),
+                    total_cnep=fontes.get("cnep", {}).get("total", 0),
+                    total_cepim=fontes.get("cepim", {}).get("total", 0),
+                    total_contratos=fontes.get("contratos", {}).get("total", 0),
+                    total_convenios=fontes.get("convenios", {}).get("total", 0),
+                    total_pncp=fontes.get("pncp", {}).get("total", 0),
+                    dados_ceis=fontes.get("ceis", {}).get("dados", []),
+                    dados_cnep=fontes.get("cnep", {}).get("dados", []),
+                    dados_cepim=fontes.get("cepim", {}).get("dados", []),
+                    dados_contratos=fontes.get("contratos", {}).get("dados", []),
+                    dados_convenios=fontes.get("convenios", {}).get("dados", []),
+                    dados_pncp=fontes.get("pncp", {}).get("dados", []),
+                    dados_receita_federal=fontes.get("receita_federal", {}),
+                    dados_tse={
+                        "candidaturas": fontes.get("tse_candidaturas", {}),
+                        "bens": fontes.get("tse_bens", {})
+                    },
+                    resultado_completo=resultado,
+                    avaliacao=avaliacao,
+                    alertas=avaliacao.get('alertas', []),
+                    usuario_id=current_user.id if current_user.is_authenticated else None,
+                    ip_origem=_obter_ip_cliente()
+                )
+                
+                # Salvar no banco de dados
+                analise.save()
+                print(f"[ANALISE] Salvo com sucesso - ID: {analise.id}")
+                
+                # Carregar histórico
+                print(f"[ANALISE] Buscando histórico para {cpf_cnpj_limpo}")
+                historico = AnaliseCompleta.find_by_cpf_cnpj(cpf_cnpj_limpo)
+                print(f"[ANALISE] Encontrados {len(historico)} registros no histórico")
+                
+            except Exception as e:
+                import traceback
+                print(f"[ERROR] Erro em analise_completa:")
+                print(f"[ERROR] {type(e).__name__}: {str(e)}")
+                print(f"[ERROR] Traceback:\n{traceback.format_exc()}")
+                erro = f"Erro ao processar análise: {str(e)}"
 
-    return render_template(
-        'home/analise_completa.html',
-        segment='analise_completa',
-        resultado=resultado,
-        cpf_cnpj=cpf_cnpj,
-    )
+        return render_template(
+            'home/analise_completa.html',
+            segment='analise_completa',
+            resultado=resultado,
+            cpf_cnpj=cpf_cnpj,
+            erro=erro,
+            historico=historico or []
+        )
+        
+    except Exception as e:
+        import traceback
+        print(f"[ERROR] Erro fatal em analise_completa:")
+        print(f"[ERROR] {type(e).__name__}: {str(e)}")
+        traceback.print_exc()
+        return render_template(
+            'home/analise_completa.html',
+            segment='analise_completa',
+            resultado=None,
+            cpf_cnpj="",
+            erro=f"Erro ao carregar página: {str(e)}",
+            historico=[]
+        )
 
 
 @blueprint.route('/sancoes-contratos')
