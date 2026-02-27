@@ -239,6 +239,15 @@ for padrao in padroes:
 		print(f"{padrao['tipo']}: {padrao['descricao']}")
 ```
 
+## Removidos os comandos de migração do Dockerfile
+
+Removidos os comandos de migração do Dockerfile - flask db init, flask db migrate, flask db upgrade não devem rodar a cada build
+```sh
+RUN flask db init
+RUN flask db migrate
+RUN flask db upgrade
+```
+
 ### Curl - Via API
 
 ```bash

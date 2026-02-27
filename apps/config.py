@@ -55,8 +55,13 @@ class Config(object):
         try:
             
             # Relational DBMS: PSQL, MySql
+            # Use pymysql driver explicitly for MySQL
+            db_engine = DB_ENGINE
+            if DB_ENGINE == 'mysql':
+                db_engine = 'mysql+pymysql'
+            
             SQLALCHEMY_DATABASE_URI = '{}://{}:{}@{}:{}/{}'.format(
-                DB_ENGINE,
+                db_engine,
                 DB_USERNAME,
                 DB_PASS,
                 DB_HOST,
