@@ -1,0 +1,230 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Dashboard - Cruzamento de Dados Públicos {% endblock %}
+
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h2 class="card-title mb-2">Sistema de Cruzamento de Dados Abertos do Governo Federal</h2>
+                                <p class="card-category mb-0">Identificação de empresas sancionadas que continuam recebendo contratos públicos</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body"></div>
+                </div>
+            </div>
+        </div>
+
+        {% if stats %}
+        <div class="row">
+            <div class="col-lg-3 col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="info-icon text-center icon-warning">
+                                    <i class="tim-icons icon-trophy"></i>
+                                </div>
+                            </div>
+                            <div class="col-7">
+                                <div class="numbers">
+                                    <p class="card-category">Contratos Analisados</p>
+                                    <h3 class="card-title">{{ "{:,}".format(stats.total_contratos).replace(',', '.') }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="info-icon text-center icon-primary">
+                                    <i class="tim-icons icon-alert-circle-exc"></i>
+                                </div>
+                            </div>
+                            <div class="col-7">
+                                <div class="numbers">
+                                    <p class="card-category">Sanções Ativas</p>
+                                    <h3 class="card-title">{{ stats.total_sancoes }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="info-icon text-center icon-danger">
+                                    <i class="tim-icons icon-simple-remove"></i>
+                                </div>
+                            </div>
+                            <div class="col-7">
+                                <div class="numbers">
+                                    <p class="card-category">Irregularidades</p>
+                                    <h3 class="card-title">{{ stats.total_irregularidades }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="info-icon text-center icon-success">
+                                    <i class="tim-icons icon-money-coins"></i>
+                                </div>
+                            </div>
+                            <div class="col-7">
+                                <div class="numbers">
+                                    <p class="card-category">Valor Irregular</p>
+                                    <h3 class="card-title">R$ {{ "{:,.2f}".format(stats.valor_irregular).replace(',', 'X').replace('.', ',').replace('X', '.') }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if padroes %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Padrões Suspeitos Detectados</h4>
+                        <p class="card-category">Irregularidades identificadas automaticamente</p>
+                    </div>
+                    <div class="card-body">
+                        {% for padrao in padroes %}
+                        <div class="alert {% if padrao.gravidade == 'CRÍTICA' %}alert-danger{% elif padrao.gravidade == 'ALTA' %}alert-warning{% else %}alert-info{% endif %}" role="alert">
+                            <strong>{{ padrao.tipo }}</strong> - {{ padrao.descricao }}
+                            {% if padrao.valor %}
+                            <br><small>Valor: R$ {{ "{:,.2f}".format(padrao.valor).replace(',', 'X').replace('.', ',').replace('X', '.') }}</small>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if stats.empresas_irregulares %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Top Empresas com Contratos Durante Sanção</h4>
+                        <p class="card-category">Empresas que firmaram contratos públicos enquanto sancionadas</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table tablesorter">
+                                <thead class="text-primary">
+                                    <tr>
+                                        <th>CNPJ/CPF</th>
+                                        <th>Nome</th>
+                                        <th class="text-center">Contratos</th>
+                                        <th class="text-right">Valor Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for empresa in stats.empresas_irregulares[:10] %}
+                                    <tr>
+                                        <td>{{ empresa.cpf_cnpj }}</td>
+                                        <td>{{ empresa.nome }}</td>
+                                        <td class="text-center">{{ empresa.contratos|length }}</td>
+                                        <td class="text-right">R$ {{ "{:,.2f}".format(empresa.valor_total).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="/sancoes-contratos" class="btn btn-primary">Ver Análise Completa</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="tim-icons icon-upload" style="font-size: 48px; color: #888;"></i>
+                        <h3 class="mt-3">Nenhum dado disponível</h3>
+                        <p class="text-muted">Importe dados de CEIS e contratos para começar a análise.</p>
+                        {% if erro %}
+                        <div class="alert alert-warning mt-3">
+                            <strong>Erro:</strong> {{ erro }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-4 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="tim-icons icon-zoom-split text-primary"></i>
+                            Monitor de Integridade
+                        </h4>
+                        <p class="card-category">Consulte CPF/CNPJ no Portal da Transparência e CEIS</p>
+                        <a href="/monitor-integridade" class="btn btn-sm btn-primary">Acessar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="tim-icons icon-atom text-info"></i>
+                            Análise Completa
+                        </h4>
+                        <p class="card-category">Consulta integrada em múltiplas bases de dados</p>
+                        <a href="/analise-completa" class="btn btn-sm btn-info">Acessar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="tim-icons icon-chart-bar-32 text-success"></i>
+                            Sanções vs Contratos
+                        </h4>
+                        <p class="card-category">Análise detalhada de irregularidades detectadas</p>
+                        <a href="/sancoes-contratos" class="btn btn-sm btn-success">Acessar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block javascripts %}{% endblock javascripts %}

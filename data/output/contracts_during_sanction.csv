@@ -1,0 +1,2 @@
+doc_key,supplier_name,contract_number,contract_date,contract_value,organ,name,sanction_type,sanction_start,sanction_end
+12345678000190,Empresa Exemplo Sancionada,CONTR-001,2025-10-06,150000.0,MINISTERIO X,Empresa Exemplo Sancionada,INIDONEIDADE,2025-01-01,2026-12-31

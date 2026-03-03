@@ -1,0 +1,35 @@
+services:
+  politicos:
+    profiles: ["cli"]
+    build:
+      context: .
+      dockerfile: dockerfile
+    working_dir: /app
+    environment:
+      DATA_DIR: ${DATA_DIR:-/app/data}
+      CEIS_CSV: ${CEIS_CSV:-/app/data/raw/ceis.csv}
+      CONTRACTS_CSV: ${CONTRACTS_CSV:-/app/data/raw/contracts.csv}
+      OUTPUT_DIR: ${OUTPUT_DIR:-/app/data/output}
+    volumes:
+      - ./:/app
+    command: ["politicos", "scan-sanctions"]
+    restart: "no"
+
+  dev-shell:
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: dockerfile
+    working_dir: /app
+    environment:
+      DATA_DIR: ${DATA_DIR:-/app/data}
+      CEIS_CSV: ${CEIS_CSV:-/app/data/raw/ceis.csv}
+      CONTRACTS_CSV: ${CONTRACTS_CSV:-/app/data/raw/contracts.csv}
+      OUTPUT_DIR: ${OUTPUT_DIR:-/app/data/output}
+    volumes:
+      - ./:/app
+    entrypoint: ["bash"]
+    stdin_open: true
+    tty: true
+    restart: "no"
+

@@ -1,0 +1,7 @@
+{
+  "sanctions_rows": 1,
+  "contracts_rows": 2,
+  "flagged_rows": 1,
+  "flagged_total_value": 150000.0,
+  "output_csv": "/app/data/output/contracts_during_sanction.csv"
+}
